@@ -45,17 +45,12 @@ pub fn is_valid(code: &str) -> bool {
             },
         );
 
-    match result {
-        Some(LuhnResult {
-            num_digits: 0..=1,
-            luhn_sum: _,
-            double_next: _,
-        }) => false,
-        Some(LuhnResult {
-            num_digits: _,
-            luhn_sum: sum,
-            double_next: _,
-        }) => sum % 10 == 0,
-        None => false,
+    if let Some(result) = result {
+        match result.num_digits {
+            0 | 1 => false,
+            _ => result.luhn_sum % 10 == 0,
+        }
+    } else {
+        false
     }
 }
