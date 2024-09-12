@@ -1,14 +1,17 @@
 use std::ops::Rem;
 
-pub fn is_leap_year(year: u64) -> bool {
-    if year.divisible_by(100) {
-        return year.divisible_by(400);
+pub fn is_leap_year<T>(year: T) -> bool
+where
+    T: DivisibleBy + Copy + From<i16>
+{
+    if year.divisible_by(100i16.into()) {
+        return year.divisible_by(400i16.into());
     }
 
-    year.divisible_by(4)
+    year.divisible_by(4i16.into())
 }
 
-trait DivisibleBy {
+pub trait DivisibleBy {
     fn divisible_by(self, n: Self) -> bool;
 }
 
