@@ -1,29 +1,44 @@
 use rand::prelude::*;
 
-pub fn private_key(p: u64) -> u64 {
+pub fn private_key(prime_1: u64) -> u64 {
     let mut rng = thread_rng();
-    let x: u64 = rng.gen_range(2..p);
-
-    x
+    rng.gen_range(2..prime_1)
 }
 
-pub fn public_key(p: u64, g: u64, private_key: u64) -> u64 {
-    // public_key = g^private_key mod p
-    let mut key = 1u64;
-
-    for _ in 0..private_key {
-        key = (key.wrapping_mul(g)) % p;
-    }
-
-    key
+pub fn public_key(prime_1: u64, prime_2: u64, private_key: u64) -> u64 {
+    mod_pow(prime_2, private_key, prime_1)
 }
 
-pub fn secret(p: u64, other_public_key: u64, private_key: u64) -> u64 {
-    let mut secret = 1u64;
+pub fn secret(prime_1: u64, other_public_key: u64, private_key: u64) -> u64 {
+    mod_pow(other_public_key, private_key, prime_1)
+}
 
-    for _ in 0..private_key {
-        secret = (secret.wrapping_mul(other_public_key)) % p;
+pub fn mod_pow(base: u64, mut exp: u64, modulus: u64) -> u64 {
+    if modulus == 1 {
+        return 0;
     }
 
-    secret
+    let mut result: u128 = 1;
+    let mut new_base: u128 = (base % modulus) as u128;
+
+    while exp > 0 {
+        if exp % 2 == 1 {
+            result = (result * new_base) % modulus as u128;
+        }
+
+        new_base = (new_base * new_base) % modulus as u128;
+        exp >>= 1;
+    }
+
+    result.try_into().expect("this will always fit")
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_mod_pow() {
+        assert_eq!(mod_pow(4, 13, 497), 445);
+    }
 }
